@@ -61,8 +61,8 @@ def calculate_damage(pokemon_a, pokemon_b):
         type1_a = ""
 
     # Extract 'against_' values for type1 and type2 from Pokemon B
-    against_type1_b = pokemon_b[f"against_{type1_a}"]
-    against_type2_b = pokemon_b[f"against_{type2_a}"] if type2_a else 1
+    against_type1_b = pokemon_b.get(f"against_{type1_a}", 1)
+    against_type2_b = pokemon_b.get(f"against_{type1_a}", 1) if type2_a else 1
 
     if np.isnan(against_type1_b):
         against_type1_b = 1.0  # Set default resistance to 1 if NaN
