@@ -55,11 +55,22 @@ def get_battle_status(battle_id: str):
     return battle
 
 
+# Pagination API
+@app.get("/getPokemonPagination/")
+def list_pokemon(skip: int = 0, limit: int = 10):
+    # Replace NaN values with None to be JSON-compliant
+    pokemon_data = (
+        df.iloc[skip : skip + limit].replace({np.nan: None}).to_dict(orient="records")
+    )
+
+    return pokemon_data
+
+
 # Background battle function
 async def battle_simulator(battle_id: str, pokemon_a: str, pokemon_b: str):
     async with lock:
         try:
-            breakpoint()
+            # breakpoint()
             # get the data for pokemon
             pkm_a = get_pokemon_data(pokemon_a)
             pkm_b = get_pokemon_data(pokemon_b)
