@@ -4,6 +4,7 @@ from uuid import uuid4
 import Levenshtein
 import numpy as np
 import asyncio
+from models import BattleStatusResponse, BattleResult
 
 app = FastAPI()
 lock = asyncio.Lock()
@@ -31,13 +32,25 @@ valid_pokemon_names = df["name"].str.lower().tolist()
 # API to start a battle
 @app.post("/battle/")
 def start_battle(pokemon_a: str, pokemon_b: str, background_tasks: BackgroundTasks):
+    # breakpoint()
+    str_pk1 = pokemon_a
+    str_pk2 = pokemon_b
     pokemon_a = get_pokemon_data(pokemon_a)
     pokemon_b = get_pokemon_data(pokemon_b)
     battle_id = str(uuid4())
     battles[battle_id] = {"status": BattleStatus.IN_PROGRESS, "result": None}
     # battle_simulator(battle_id, pokemon_a, pokemon_b)
-    background_tasks.add_task(battle_simulator, battle_id, pokemon_a, pokemon_b)
+    background_tasks.add_task(battle_simulator, battle_id, str_pk1, str_pk2)
     return {"battle_id": battle_id}
+
+
+# API 3: Get battle status
+@app.get("/battle/{battle_id}", response_model=BattleStatusResponse)
+def get_battle_status(battle_id: str):
+    battle = battles.get(battle_id)
+    if not battle:
+        raise HTTPException(status_code=404, detail="Battle not found")
+    return battle
 
 
 # Helper function to fetch Pokémon data
@@ -54,15 +67,15 @@ def get_pokemon_data(pokemon_name: str):
 async def battle_simulator(battle_id: str, pokemon_a: str, pokemon_b: str):
     async with lock:
         try:
-            # breakpoint()
+            breakpoint()
             # print("called")
             # Fetch Pokémon data
-            # pkmn_a = get_pokemon_data(pokemon_a)
-            # pkmn_b = get_pokemon_data(pokemon_b)
+            pkm_a = get_pokemon_data(pokemon_a)
+            pkm_b = get_pokemon_data(pokemon_b)
 
             # Perform battle logic (e.g., damage calculation)
-            damage_a_to_b = calculate_damage(pkmn_a, pkmn_b)
-            damage_b_to_a = calculate_damage(pkmn_b, pkmn_a)
+            damage_a_to_b = calculate_damage(pkm_a, pkm_b)
+            damage_b_to_a = calculate_damage(pkm_b, pkm_a)
 
             # Determine winner
             if damage_a_to_b > damage_b_to_a:
