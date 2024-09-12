@@ -4,6 +4,8 @@ from uuid import uuid4
 import Levenshtein
 import numpy as np
 import asyncio
+import uvicorn
+import os
 from models import BattleStatusResponse, BattleResult
 from helper import get_pokemon_data, correct_spelling, calculate_damage
 
@@ -95,3 +97,13 @@ async def battle_simulator(battle_id: str, pokemon_a: str, pokemon_b: str):
             }
         except Exception as e:
             battles[battle_id] = {"status": BattleStatus.FAILED, "result": None}
+
+
+@app.get("/")
+def read_root():
+    return {"Hello": "World"}
+
+
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", 8000))  # Default to 8000 if PORT is not set
+    uvicorn.run(app, host="0.0.0.0", port=port)
